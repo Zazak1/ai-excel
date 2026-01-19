@@ -1,13 +1,11 @@
+@import "tailwindcss";
+
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @layer base {
   body {
-    @apply font-sans text-text-main bg-background-light;
+    @apply font-sans text-slate-800 bg-slate-50;
   }
 }
 
@@ -32,4 +30,26 @@
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Grid cell active state */
+.grid-cell-active {
+  outline: 2px solid #1337ec;
+  outline-offset: -2px;
+  background-color: rgba(19, 55, 236, 0.05);
+}
+
+/* Canvas shadow for PPT */
+.canvas-shadow {
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
 }

@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -31,7 +30,7 @@ const Sidebar = () => {
                             }`
                         }
                     >
-                        <span className={`material-symbols-outlined ${!isActive ? 'group-hover:text-primary transition-colors' : ''}`}>
+                        <span className="material-symbols-outlined group-hover:text-primary transition-colors">
                             {item.icon}
                         </span>
                         <p className="text-sm font-medium">{item.name}</p>

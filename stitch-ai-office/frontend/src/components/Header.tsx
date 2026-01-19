@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Header = () => {
     return (
         <header className="flex items-center justify-between px-8 py-4 bg-white border-b border-slate-200">
