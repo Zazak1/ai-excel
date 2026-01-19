@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 venv/
+.venv/
 __pycache__/
 *.pyc
 
@@ -17,6 +18,8 @@ build/
 # IDE
 .idea/
 .vscode/
+.cursor/
+.claude/
 *.swp
 *.swo
 
@@ -31,3 +34,8 @@ npm-debug.log*
 # Cache
 .cache/
 *.tsbuildinfo
+
+# Runtime data
+ai-office/data/
+ai-office/backend/data/
+ai-office/backend/logs/

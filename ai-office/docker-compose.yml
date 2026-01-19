@@ -18,9 +18,45 @@ services:
       dockerfile: Dockerfile
     container_name: ai-office-backend
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
-      - ENV=production
+      - ENV=${ENV:-production}
+      - DATA_DIR=/app/data
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+    networks:
+      - ai-office-network
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-office-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENV=${ENV:-production}
+      - DATA_DIR=/app/data
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+    command: ["python", "-m", "app.workers.rq_worker"]
+    networks:
+      - ai-office-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-office-redis
+    restart: unless-stopped
     networks:
       - ai-office-network
 

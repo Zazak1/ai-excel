@@ -4,6 +4,14 @@ import * as XLSX from 'xlsx';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { cn } from '../lib/utils';
+import {
+  apiDownloadBlob,
+  apiGetJson,
+  apiPostFormJson,
+  type ApiError,
+  type ApiExcelJobCreateResponse,
+  type ApiExcelJobInfo,
+} from '../lib/api';
 
 type Message = {
   id: string;
@@ -14,12 +22,29 @@ type Message = {
   timestamp: Date;
 };
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function formatApiError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  const e = error as Partial<ApiError> | null | undefined;
+  return e?.message ?? '请求失败';
+}
+
+function extractXlsxFilename(originalName: string) {
+  const base = originalName.replace(/\.[^.]+$/, '');
+  return `processed-${base}.xlsx`;
+}
+
 const SpreadsheetEditor = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentExcelData, setCurrentExcelData] = useState<any[][]>([]);
   const [excelHeaders, setExcelHeaders] = useState<string[]>([]);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [lastOutputFile, setLastOutputFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,40 +74,38 @@ const SpreadsheetEditor = () => {
     });
   };
 
-  const processExcelWithAI = async (file: File, userPrompt: string): Promise<any[][]> => {
-    // 模拟 AI 处理过程
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+  const runBackendJob = async (file: File, userPrompt: string): Promise<{ job: ApiExcelJobInfo; output: File }> => {
+    const formData = new FormData();
+    formData.append('prompt', userPrompt);
+    formData.append('file', file, file.name);
 
-    const { data } = await readExcelFile(file);
-    
-    // 模拟 AI 处理：根据用户提示进行简单处理
-    let processedData = [...data];
-    
-    if (userPrompt.includes('排序') || userPrompt.includes('sort')) {
-      // 简单排序示例
-      const headers = processedData[0];
-      processedData = [headers, ...processedData.slice(1).sort()];
-    } else if (userPrompt.includes('汇总') || userPrompt.includes('sum')) {
-      // 添加汇总行
-      const headers = processedData[0];
-      const sumRow = headers.map((_, colIndex) => {
-        if (colIndex === 0) return '总计';
-        const numbers = processedData.slice(1).map((row) => {
-          const val = row[colIndex];
-          return typeof val === 'number' ? val : parseFloat(val) || 0;
-        });
-        return numbers.reduce((a, b) => a + b, 0);
-      });
-      processedData = [...processedData, sumRow];
-    } else if (userPrompt.includes('筛选') || userPrompt.includes('filter')) {
-      // 简单筛选示例
-      const headers = processedData[0];
-      processedData = [headers, ...processedData.slice(1).filter((row) => row.some((cell) => cell !== ''))];
+    const created = await apiPostFormJson<ApiExcelJobCreateResponse>('/excel/jobs', formData);
+    const jobId = created.job_id;
+
+    let job: ApiExcelJobInfo | null = null;
+    const startedAt = Date.now();
+    const timeoutMs = 120_000;
+
+    while (Date.now() - startedAt < timeoutMs) {
+      job = await apiGetJson<ApiExcelJobInfo>(`/excel/jobs/${jobId}`);
+      if (job.status === 'succeeded' || job.status === 'failed') break;
+      await sleep(500);
     }
 
-    setIsProcessing(false);
-    return processedData;
+    if (!job) throw new Error('任务创建失败');
+    if (job.status !== 'succeeded' && job.status !== 'failed') {
+      throw new Error(`任务超时（job_id=${jobId}，status=${job.status}）`);
+    }
+    if (job.status !== 'succeeded') {
+      throw new Error(job.error ?? `任务失败：${job.status}`);
+    }
+
+    const blob = await apiDownloadBlob(`/excel/jobs/${jobId}/download`);
+    const outputName = extractXlsxFilename(file.name);
+    const outputFile = new File([blob], outputName, {
+      type: blob.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    return { job, output: outputFile };
   };
 
   const handleFileUpload = async (file: File) => {
@@ -90,6 +113,8 @@ const SpreadsheetEditor = () => {
       const { data, headers } = await readExcelFile(file);
       setCurrentExcelData(data);
       setExcelHeaders(headers);
+      setCurrentFile(file);
+      setLastOutputFile(null);
 
       const userMessage: Message = {
         id: Date.now().toString(),
@@ -130,7 +155,9 @@ const SpreadsheetEditor = () => {
     // 处理文件上传
     if (file) {
       await handleFileUpload(file);
-      fileInputRef.current.value = '';
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       setInputValue('');
       return;
     }
@@ -148,43 +175,66 @@ const SpreadsheetEditor = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
 
-    // 如果有当前 Excel 数据，处理它
-    if (currentExcelData.length > 0) {
+    if (!currentFile) {
       setIsProcessing(true);
-      const processedData = await processExcelWithAI(
-        new File([], 'current.xlsx'),
-        prompt
-      );
-      
-      // 更新表格数据
-      setCurrentExcelData(processedData);
-      if (processedData[0]) {
-        setExcelHeaders(processedData[0].map(String));
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `已完成处理！\n\n根据您的要求"${prompt}"，我已经对表格数据进行了处理。处理后的数据已更新到右侧预览区域，您可以查看结果。\n\n如果需要进一步处理，请告诉我！`,
-        excelData: processedData,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
+      await sleep(400);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: '请先上传一个 .xlsx 文件，然后再告诉我你希望如何处理（例如：透视表、跨表合并、公式列等）。',
+          timestamp: new Date(),
+        },
+      ]);
       setIsProcessing(false);
-    } else {
-      // 没有文件时的回复
-      setIsProcessing(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      const assistantMessage: Message = {
+      return;
+    }
+
+    setIsProcessing(true);
+    setMessages((prev) => [
+      ...prev,
+      {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `您好！我是 AI 表格助手。\n\n请先上传一个 Excel 文件，然后告诉我您需要如何处理数据。我可以帮您：\n\n1. 📊 数据分析和统计\n2. 🔄 数据清洗和格式化\n3. 📈 数据排序和筛选\n4. ➕ 数据计算和汇总\n5. 📋 生成报告和图表\n\n点击上传按钮或拖拽 Excel 文件到输入框即可开始！`,
+        content: `已提交后端任务，正在处理：${prompt}`,
         timestamp: new Date(),
-      };
+      },
+    ]);
 
-      setMessages((prev) => [...prev, assistantMessage]);
+    try {
+      const { job, output } = await runBackendJob(currentFile, prompt);
+      const { data, headers } = await readExcelFile(output);
+      setCurrentExcelData(data);
+      setExcelHeaders(headers);
+      setCurrentFile(output);
+      setLastOutputFile(output);
+
+      const summaryText =
+        job.summary != null ? `\n\n摘要：\n${JSON.stringify(job.summary, null, 2)}` : '';
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          role: 'assistant',
+          content: `处理完成（job_id=${job.job_id}）。结果已更新到右侧预览区，点击右上角“下载”可获取新文件。${summaryText}`,
+          excelData: data,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (error) {
+      const message = formatApiError(error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          role: 'assistant',
+          content: `处理失败：${message}\n\n请确认后端已启动（/api/health），且已配置 DEEPSEEK_API_KEY。`,
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -197,6 +247,18 @@ const SpreadsheetEditor = () => {
   };
 
   const downloadExcel = () => {
+    if (lastOutputFile) {
+      const url = URL.createObjectURL(lastOutputFile);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = lastOutputFile.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      return;
+    }
+
     if (currentExcelData.length === 0) return;
 
     const ws = XLSX.utils.aoa_to_sheet(currentExcelData);
@@ -225,10 +287,10 @@ const SpreadsheetEditor = () => {
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
-      if (file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      if (file.name.match(/\.(xlsx)$/i)) {
         await handleFileUpload(file);
       } else {
-        alert('请上传 Excel 文件（.xlsx, .xls, .csv）');
+        alert('请上传 Excel 文件（.xlsx）');
       }
     }
   };
@@ -251,7 +313,7 @@ const SpreadsheetEditor = () => {
         {/* 聊天头部 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <div className="size-8 bg-primary rounded-lg flex items-center justify-center">
+            <div className="size-8 bg-[#1337ec] rounded-lg flex items-center justify-center">
               <span className="material-symbols-outlined text-white text-lg">auto_awesome</span>
             </div>
             <div>
@@ -263,11 +325,11 @@ const SpreadsheetEditor = () => {
         </div>
 
         {/* 消息列表 */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <span className="material-symbols-outlined text-primary text-3xl">table_chart</span>
+              <div className="size-16 rounded-full bg-[#1337ec]/10 flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-[#1337ec] text-3xl">table_chart</span>
               </div>
               <p className="text-sm font-bold text-slate-700 mb-1">开始使用 AI 表格助手</p>
               <p className="text-xs text-slate-500">上传 Excel 文件，告诉我您需要如何处理数据</p>
@@ -282,16 +344,16 @@ const SpreadsheetEditor = () => {
                 )}
               >
                 {message.role === 'assistant' && (
-                  <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <span className="material-symbols-outlined text-primary text-sm">auto_awesome</span>
+                  <div className="size-8 rounded-full bg-[#1337ec]/10 flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[#1337ec] text-sm">auto_awesome</span>
                   </div>
                 )}
                 <div
                   className={cn(
                     'max-w-[80%] rounded-xl px-4 py-3',
                     message.role === 'user'
-                      ? 'bg-primary text-white'
-                      : 'bg-slate-50 text-slate-800 border border-slate-200'
+                      ? 'bg-[#1337ec] text-white shadow-lg shadow-blue-200/40'
+                      : 'bg-white text-slate-900 border border-slate-200 shadow-sm'
                   )}
                 >
                   {message.file && (
@@ -301,7 +363,12 @@ const SpreadsheetEditor = () => {
                     </div>
                   )}
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                  <p className="text-[10px] opacity-60 mt-2">
+                  <p
+                    className={cn(
+                      'text-[10px] mt-2',
+                      message.role === 'user' ? 'text-white/80' : 'text-slate-500'
+                    )}
+                  >
                     {message.timestamp.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
@@ -315,8 +382,8 @@ const SpreadsheetEditor = () => {
           )}
           {isProcessing && (
             <div className="flex gap-3 justify-start">
-              <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <span className="material-symbols-outlined text-primary text-sm">auto_awesome</span>
+              <div className="size-8 rounded-full bg-[#1337ec]/10 flex items-center justify-center flex-shrink-0">
+                <span className="material-symbols-outlined text-[#1337ec] text-sm">auto_awesome</span>
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
                 <div className="flex gap-1">
@@ -334,7 +401,7 @@ const SpreadsheetEditor = () => {
         <div
           className={cn(
             'border-t border-slate-200 p-4 transition-colors',
-            isDragging && 'bg-primary-light/30'
+            isDragging && 'bg-[#1337ec]/5'
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -344,7 +411,7 @@ const SpreadsheetEditor = () => {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".xlsx,.xls,.csv"
+              accept=".xlsx"
               onChange={handleFileSelect}
               className="hidden"
             />
@@ -367,8 +434,8 @@ const SpreadsheetEditor = () => {
                 }}
                 placeholder={isDragging ? '松开以上传文件' : '输入消息或拖拽 Excel 文件到此处...'}
                 className={cn(
-                  'w-full min-h-[44px] max-h-32 px-4 py-2.5 bg-slate-50 border rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-primary focus:border-primary focus:bg-white transition-colors resize-none',
-                  isDragging ? 'border-primary border-2 border-dashed' : 'border-slate-200'
+                  'w-full min-h-[44px] max-h-32 px-4 py-2.5 bg-slate-50 border rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-[#1337ec] focus:border-[#1337ec] focus:bg-white transition-colors resize-none',
+                  isDragging ? 'border-[#1337ec] border-2 border-dashed' : 'border-slate-200'
                 )}
                 rows={1}
               />

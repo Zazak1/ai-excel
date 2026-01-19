@@ -12,13 +12,6 @@ AI 驱动的智能办公套件项目集合。
 ├── ai-office/                    # 前后端分离项目
 │   ├── backend/                  # Python 后端 API
 │   └── frontend/                 # React + Vite 前端
-│
-└── stitch_ai_office_suite_dashboard/  # Dashboard 子项目集合
-    ├── ai_office_suite_dashboard_1/
-    ├── ai_office_suite_dashboard_2/
-    ├── ai_office_suite_dashboard_3/
-    ├── ai_ppt_designer_workspace/
-    └── ai_smart_spreadsheet_editor/
 ```
 
 ## 🚀 技术栈
@@ -42,6 +35,9 @@ npm run dev
 
 ### ai-office
 ```bash
+# 可选：复制环境变量（后端会自动向上查找并加载 .env）
+cp ai-office/.env.example ai-office/.env
+
 # Frontend
 cd ai-office/frontend
 npm install
@@ -49,8 +45,8 @@ npm run dev
 
 # Backend
 cd ai-office/backend
-source venv/bin/activate
-python app/main.py
+python3 -m pip install -r requirements.txt
+python3 -m uvicorn app.main:app --reload --port 8000
 ```
 
 ## 📄 License

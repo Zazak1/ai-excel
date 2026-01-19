@@ -7,6 +7,13 @@
 docker-compose up -d --build
 ```
 
+会启动：
+- `frontend`：前端静态站点
+- `backend`：FastAPI API 服务
+- `worker`：后台任务 worker（执行 Excel Code Interpreter）
+- `redis`：任务队列
+- `nginx`：反向代理
+
 ### 2. 查看服务状态
 ```bash
 docker-compose ps
@@ -32,6 +39,15 @@ docker-compose down
 - **前端**: http://localhost
 - **API**: http://localhost/api
 - **健康检查**: http://localhost/api/health
+- **Excel 处理（异步任务）**:
+  - 创建任务：`POST http://localhost/api/excel/jobs`（multipart：`file` + `prompt`）
+  - 查询任务：`GET http://localhost/api/excel/jobs/{job_id}`
+  - 下载结果：`GET http://localhost/api/excel/jobs/{job_id}/download`
+- **数据分析（异步任务）**:
+  - 创建任务：`POST http://localhost/api/analytics/jobs`（multipart：`file` + `prompt`）
+  - 查询任务：`GET http://localhost/api/analytics/jobs/{job_id}`
+  - 产物列表：`GET http://localhost/api/analytics/jobs/{job_id}/artifacts`
+  - 下载图表：`GET http://localhost/api/analytics/jobs/{job_id}/artifacts/{name}`（png/json）
 
 ## 📁 项目结构
 
@@ -59,3 +75,5 @@ ai-office/
 cp .env.example .env
 # 编辑 .env 文件
 ```
+
+后端需要设置 `DEEPSEEK_API_KEY` 才能生成 Excel 处理代码（Code Interpreter 工作流）。

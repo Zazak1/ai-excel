@@ -1,66 +1,67 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { cn } from '../lib/utils';
+import {
+  apiGetJson,
+  apiPostFormJson,
+  apiPublicUrl,
+  type ApiAnalyticsJobCreateResponse,
+  type ApiAnalyticsJobInfo,
+  type ApiArtifactsResponse,
+  type ApiError,
+} from '../lib/api';
 
-type Summary = {
-  rows: number;
-  columns: number;
-  numericColumns: number;
-  sampleHeaders: string[];
-  notes: string[];
-};
-
-function parseCsv(text: string) {
-  const lines = text
-    .split(/\r?\n/g)
-    .map((l) => l.trim())
-    .filter(Boolean);
-  if (lines.length === 0) return { headers: [], rows: [] as string[][] };
-
-  const rows = lines.map((l) => l.split(',').map((cell) => cell.trim()));
-  const headers = rows[0] ?? [];
-  const dataRows = rows.slice(1);
-  return { headers, rows: dataRows };
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function isFiniteNumber(value: string) {
-  const n = Number(value);
-  return Number.isFinite(n);
+function formatApiError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  const e = error as Partial<ApiError> | null | undefined;
+  return e?.message ?? '请求失败';
 }
 
-async function readFileAsText(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target?.result as string);
-    reader.onerror = reject;
-    reader.readAsText(file, 'UTF-8');
-  });
+function formatStage(stage?: string | null) {
+  if (!stage) return '';
+  const map: Record<string, string> = {
+    starting: '准备中',
+    reading_metadata: '读取元信息',
+    generating_code: '生成分析代码',
+    retrying: '重试中',
+    validating_code: '校验代码',
+    running_sandbox: '运行分析',
+    summarizing: '生成摘要',
+    finalizing: '整理结果',
+    done: '完成',
+    failed: '失败',
+  };
+  return map[stage] ?? stage;
 }
 
 const DataAnalysis = () => {
-  const [csv, setCsv] = useState(
-    'date,revenue,cost\n2025-01-01,120,80\n2025-01-02,140,90\n2025-01-03,160,110\n'
-  );
+  const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>('');
+  const [prompt, setPrompt] = useState('请对表格内容生成摘要（规模/字段/缺失/分布/趋势），识别异常点，并绘制折线图展示主要指标趋势。');
+  const [isRunning, setIsRunning] = useState(false);
+  const [job, setJob] = useState<ApiAnalyticsJobInfo | null>(null);
+  const [artifacts, setArtifacts] = useState<ApiArtifactsResponse | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (file: File) => {
-    if (!file.name.match(/\.(csv|txt)$/i)) {
-      alert('请选择 CSV 或 TXT 文件');
+    if (!file.name.match(/\.(csv|txt|xlsx)$/i)) {
+      alert('请选择 CSV、TXT 或 XLSX 文件');
       return;
     }
-    
-    try {
-      const content = await readFileAsText(file);
-      setCsv(content);
-      setFileName(file.name);
-    } catch (error) {
-      console.error('读取文件失败:', error);
-      alert('读取文件失败，请重试');
-    }
+
+    setFile(file);
+    setFileName(file.name);
+    setJob(null);
+    setArtifacts(null);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -97,31 +98,55 @@ const DataAnalysis = () => {
     fileInputRef.current?.click();
   };
 
-  const summary = useMemo<Summary>(() => {
-    const { headers, rows } = parseCsv(csv);
-    const columns = Math.max(headers.length, ...rows.map((r) => r.length));
-    if (rows.length === 0 || columns === 0) {
-      return {
-        rows: 0,
-        columns: 0,
-        numericColumns: 0,
-        sampleHeaders: headers,
-        notes: ['请上传 CSV 文件（逗号分隔），首行为表头。'],
-      };
+  const chartArtifacts = useMemo(() => {
+    const list = artifacts?.artifacts ?? [];
+    return list.filter((a) => a.exists && a.name.toLowerCase().endsWith('.png'));
+  }, [artifacts]);
+
+  const startAnalysis = async () => {
+    if (!file) {
+      alert('请先上传数据文件');
+      return;
+    }
+    const p = prompt.trim();
+    if (!p) {
+      alert('请输入分析需求');
+      return;
     }
 
-    const numericColumnFlags = Array.from({ length: columns }, (_, col) =>
-      rows.some((r) => isFiniteNumber(r[col] ?? ''))
-    );
-    const numericColumns = numericColumnFlags.filter(Boolean).length;
+    setIsRunning(true);
+    setJob(null);
+    setArtifacts(null);
+    try {
+      const formData = new FormData();
+      formData.append('prompt', p);
+      formData.append('file', file, file.name);
 
-    const notes: string[] = [];
-    if (headers.length === 0) notes.push('未检测到表头（默认使用第 1 行）。');
-    if (numericColumns === 0) notes.push('未检测到数值列；请上传包含数值的 CSV 文件以查看统计。');
-    if (rows.length > 5000) notes.push('行数较多：建议后续做后端分页/采样。');
+      const created = await apiPostFormJson<ApiAnalyticsJobCreateResponse>('/analytics/jobs', formData);
+      const jobId = created.job_id;
 
-    return { rows: rows.length, columns, numericColumns, sampleHeaders: headers, notes };
-  }, [csv]);
+      const startedAt = Date.now();
+      const timeoutMs = 600_000;
+      let info: ApiAnalyticsJobInfo | null = null;
+
+      while (Date.now() - startedAt < timeoutMs) {
+        info = await apiGetJson<ApiAnalyticsJobInfo>(`/analytics/jobs/${jobId}`);
+        setJob(info);
+        if (info.status === 'succeeded' || info.status === 'failed') break;
+        await sleep(700);
+      }
+
+      if (!info) throw new Error('任务创建失败');
+      if (info.status !== 'succeeded') throw new Error(info.error ?? `任务失败：${info.status}`);
+
+      const arts = await apiGetJson<ApiArtifactsResponse>(`/analytics/jobs/${jobId}/artifacts`);
+      setArtifacts(arts);
+    } catch (error) {
+      alert(`分析失败：${formatApiError(error)}`);
+    } finally {
+      setIsRunning(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -129,19 +154,14 @@ const DataAnalysis = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-black tracking-tight text-slate-900">数据分析</h1>
-            <Badge variant="info">demo</Badge>
+            <Badge variant="info">deepseek</Badge>
           </div>
-          <p className="mt-1 text-sm text-slate-500">支持 CSV/TXT 文件上传，本地解析与摘要统计（无第三方图表依赖）。</p>
+          <p className="mt-1 text-sm text-slate-500">上传数据，DeepSeek 生成摘要与异常分析，并用 Python 绘制图表。</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setCsv('date,revenue,cost\n2025-01-01,120,80\n2025-01-02,140,90\n2025-01-03,160,110\n');
-              setFileName('');
-            }}
-          >
-            恢复示例
+          <Button variant="primary" onClick={() => void startAnalysis()} disabled={isRunning || !file}>
+            <span className="material-symbols-outlined text-[18px]">analytics</span>
+            {isRunning ? '分析中...' : '开始分析'}
           </Button>
         </div>
       </div>
@@ -149,14 +169,14 @@ const DataAnalysis = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex items-center justify-between">
-            <p className="text-sm font-black text-slate-900">文件导入</p>
-            <Badge variant="warning">placeholder</Badge>
+            <p className="text-sm font-black text-slate-900">输入</p>
+            <Badge variant={file ? 'success' : 'warning'}>{file ? 'ready' : 'upload'}</Badge>
           </CardHeader>
           <CardContent>
             <input
               ref={fileInputRef}
               type="file"
-              accept=".csv,.txt"
+              accept=".csv,.txt,.xlsx"
               onChange={handleFileInputChange}
               className="hidden"
             />
@@ -165,26 +185,23 @@ const DataAnalysis = () => {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={handleClickUpload}
-              className={`
-                w-full min-h-[420px] border-2 border-dashed rounded-xl p-8
-                flex flex-col items-center justify-center gap-4
-                cursor-pointer transition-all
-                ${
-                  isDragging
-                    ? 'border-primary bg-primary-light border-solid'
-                    : 'border-slate-300 bg-slate-50 hover:border-primary hover:bg-primary-light/30'
-                }
-              `}
+              className={cn(
+                'w-full min-h-[260px] border-2 border-dashed rounded-xl p-8',
+                'flex flex-col items-center justify-center gap-4 cursor-pointer transition-all',
+                isDragging
+                  ? 'border-[#1337ec] bg-[#1337ec]/5 border-solid'
+                  : 'border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-slate-100/60'
+              )}
             >
               <div className="flex flex-col items-center gap-3">
-                <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-primary text-3xl">cloud_upload</span>
+                <div className="size-16 rounded-full bg-[#1337ec]/10 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[#1337ec] text-3xl">cloud_upload</span>
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-bold text-slate-900">
                     {isDragging ? '松开以上传文件' : '点击或拖拽文件到此处上传'}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">支持 CSV、TXT 格式文件</p>
+                  <p className="mt-1 text-xs text-slate-500">支持 CSV、TXT、XLSX 格式文件</p>
                 </div>
               </div>
               {fileName && (
@@ -196,57 +213,144 @@ const DataAnalysis = () => {
                 </div>
               )}
             </div>
+
+            <div className="mt-4 space-y-2">
+              <p className="text-xs font-bold text-slate-500">分析需求</p>
+              <Input
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="例如：按日期绘制收入折线图，识别异常波动并给出解释"
+              />
+              <p className="text-[11px] text-slate-500">
+                提示：尽量说明时间列、指标列、业务口径；如果是 xlsx 可说明 sheet 名。
+              </p>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex items-center justify-between">
-            <p className="text-sm font-black text-slate-900">摘要</p>
-            <Badge variant="info">local</Badge>
+            <p className="text-sm font-black text-slate-900">结果</p>
+            <Badge variant={job?.status === 'succeeded' ? 'success' : job?.status === 'failed' ? 'error' : 'info'}>
+              {job?.status ?? 'idle'}
+            </Badge>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <p className="text-xs font-bold text-slate-500">Rows</p>
-                <p className="mt-1 text-2xl font-black text-slate-900">{summary.rows}</p>
-              </div>
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <p className="text-xs font-bold text-slate-500">Columns</p>
-                <p className="mt-1 text-2xl font-black text-slate-900">{summary.columns}</p>
-              </div>
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <p className="text-xs font-bold text-slate-500">Numeric</p>
-                <p className="mt-1 text-2xl font-black text-slate-900">{summary.numericColumns}</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-slate-500">Headers</p>
-              <div className="flex flex-wrap gap-2">
-                {(summary.sampleHeaders.length ? summary.sampleHeaders : ['(none)']).map((h) => (
-                  <span
-                    key={h}
-                    className="px-2 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600"
-                  >
-                    {h}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-slate-500">Notes</p>
-              <ul className="text-sm text-slate-700 space-y-1">
-                {(summary.notes.length ? summary.notes : ['解析成功：可在此扩展图表、异常检测、聚合等功能。']).map(
-                  (n, i) => (
-                    <li key={String(i)} className="flex items-start gap-2">
-                      <span className="mt-1 size-1.5 rounded-full bg-slate-400"></span>
-                      <span>{n}</span>
-                    </li>
-                  )
+            {!job ? (
+              <div className="py-12 text-center text-sm text-slate-500">上传文件并点击“开始分析”。</div>
+            ) : job.status === 'failed' ? (
+              <div className="space-y-2">
+                <p className="text-sm font-bold text-slate-900">失败原因</p>
+                <pre className="text-xs whitespace-pre-wrap bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-700">
+                  {job.error ?? 'unknown error'}
+                </pre>
+                {job.detail && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold text-slate-500">进度信息</p>
+                    <pre className="text-xs whitespace-pre-wrap bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-700 max-h-[200px] overflow-auto custom-scrollbar">
+                      {job.detail}
+                    </pre>
+                  </div>
                 )}
-              </ul>
-            </div>
+              </div>
+            ) : job.status !== 'succeeded' ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-700">{formatStage(job.stage) || '任务处理中…'}</span>
+                  {typeof job.progress === 'number' && (
+                    <span className="text-slate-500">{Math.round(job.progress * 100)}%</span>
+                  )}
+                </div>
+                <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+                  <div
+                    className="h-full bg-[#1337ec] transition-all"
+                    style={{ width: `${Math.round(((job.progress ?? 0.08) as number) * 100)}%` }}
+                  />
+                </div>
+                {job.detail ? (
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold text-slate-500">实时输出</p>
+                    <pre className="text-xs whitespace-pre-wrap bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-700 max-h-[260px] overflow-auto custom-scrollbar">
+                      {job.detail}
+                    </pre>
+                  </div>
+                ) : (
+                  <div className="text-sm text-slate-500">请稍候，任务正在运行…</div>
+                )}
+              </div>
+            ) : (
+              <>
+                {(() => {
+                  const summary = job.summary as any;
+                  const llm = summary?.llm;
+                  const llmText = typeof llm?.text === 'string' ? (llm.text as string) : '';
+                  const highlights = Array.isArray(llm?.highlights) ? (llm.highlights as unknown[]) : [];
+                  const suggestions = Array.isArray(llm?.suggestions) ? (llm.suggestions as unknown[]) : [];
+                  if (!llmText && highlights.length === 0 && suggestions.length === 0) return null;
+                  return (
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-slate-500">大模型摘要</p>
+                      {llmText && (
+                        <div className="text-sm whitespace-pre-wrap bg-white border border-slate-200 rounded-xl p-3 text-slate-800">
+                          {llmText}
+                        </div>
+                      )}
+                      {highlights.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {highlights.slice(0, 10).map((h, idx) => (
+                            <span
+                              key={`${idx}-${String(h).slice(0, 12)}`}
+                              className="text-[11px] rounded-full bg-[#1337ec]/10 text-[#1337ec] px-3 py-1"
+                            >
+                              {String(h)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {suggestions.length > 0 && (
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-slate-500">建议</p>
+                          <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1">
+                            {suggestions.slice(0, 8).map((s, idx) => (
+                              <li key={`${idx}-${String(s).slice(0, 12)}`}>{String(s)}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-slate-500">结构化结果 JSON</p>
+                  <pre className="text-xs whitespace-pre-wrap bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-700 max-h-[240px] overflow-auto custom-scrollbar">
+                    {JSON.stringify(job.summary ?? {}, null, 2)}
+                  </pre>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-slate-500">图表</p>
+                  {chartArtifacts.length === 0 ? (
+                    <p className="text-sm text-slate-500">未生成图表（请在需求中明确要绘制哪些图）。</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {chartArtifacts.map((a) => (
+                        <div key={a.name} className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+                          <div className="px-3 py-2 border-b border-slate-200 text-xs font-bold text-slate-600">
+                            {a.name}
+                          </div>
+                          <img
+                            src={apiPublicUrl(`/analytics/jobs/${job.job_id}/artifacts/${encodeURIComponent(a.name)}`)}
+                            alt={a.name}
+                            className="w-full h-auto"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -255,4 +359,3 @@ const DataAnalysis = () => {
 };
 
 export default DataAnalysis;
-
