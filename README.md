@@ -9,7 +9,7 @@ AI 驱动的智能办公套件项目集合。
 │   ├── src/components/ui/        # UI 组件库
 │   └── src/lib/                  # 工具函数
 │
-├── stitch-ai-office/             # 前后端分离项目
+├── ai-office/                    # 前后端分离项目
 │   ├── backend/                  # Python 后端 API
 │   └── frontend/                 # React + Vite 前端
 │
@@ -40,15 +40,15 @@ npm install
 npm run dev
 ```
 
-### stitch-ai-office
+### ai-office
 ```bash
 # Frontend
-cd stitch-ai-office/frontend
+cd ai-office/frontend
 npm install
 npm run dev
 
 # Backend
-cd stitch-ai-office/backend
+cd ai-office/backend
 source venv/bin/activate
 python app/main.py
 ```

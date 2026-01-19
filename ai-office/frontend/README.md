@@ -8,7 +8,7 @@ React + Vite 的前端演示站点，默认通过同域 `/api` 访问后端（�
 2) 启动前端（Vite，默认 `5173`）
 
 ```bash
-cd stitch-ai-office/frontend
+cd ai-office/frontend
 npm install
 npm run dev
 ```
@@ -18,7 +18,7 @@ npm run dev
 ## 构建
 
 ```bash
-cd stitch-ai-office/frontend
+cd ai-office/frontend
 npm run build
 ```
 
@@ -26,10 +26,10 @@ npm run build
 
 ## 部署（推荐）
 
-使用 `stitch-ai-office/docker-compose.yml` 一键启动：
+使用 `ai-office/docker-compose.yml` 一键启动：
 
 ```bash
-cd stitch-ai-office
+cd ai-office
 docker-compose up -d --build
 ```
 

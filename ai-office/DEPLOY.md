@@ -36,7 +36,7 @@ docker-compose down
 ## 📁 项目结构
 
 ```
-stitch-ai-office/
+ai-office/
 ├── docker-compose.yml      # Docker Compose 配置
 ├── nginx/
 │   └── nginx.conf          # Nginx 反向代理配置
