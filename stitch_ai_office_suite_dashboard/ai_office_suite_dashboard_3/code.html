@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI 多文档联合分析报告中心</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1337ec",
+                        "primary-dark": "#0f2cb8",
+                        "background-light": "#f6f6f8",
+                        "surface": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["'Noto Sans SC'", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }.citation-marker {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .citation-marker:hover {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body class="bg-background-light text-slate-800 font-display min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-64 flex-shrink-0 flex flex-col bg-surface border-r border-slate-200 z-20">
+<div class="p-6 flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-md shadow-blue-200">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<h2 class="text-lg font-bold tracking-tight text-slate-900">AI 办公套件</h2>
+</div>
+<nav class="flex-1 px-4 py-4 space-y-1 custom-scrollbar overflow-y-auto">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">grid_view</span>
+<p class="text-sm font-medium">控制台</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">table_chart</span>
+<p class="text-sm font-medium">AI 智能表格</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">slideshow</span>
+<p class="text-sm font-medium">AI PPT 设计</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">analytics</span>
+<p class="text-sm font-medium">数据分析</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-50 text-primary border border-blue-100">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-bold">深度报告</p>
+</div>
+<div class="pt-8 pb-2">
+<p class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">账户</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium">设置</p>
+</div>
+</nav>
+<div class="p-4 mt-auto border-t border-slate-100">
+<div class="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-4">
+<div class="flex items-center justify-between mb-1">
+<p class="text-xs font-bold text-slate-800">专业版</p>
+<span class="text-[10px] font-bold text-primary bg-blue-50 px-1.5 py-0.5 rounded">PRO</span>
+</div>
+<p class="text-[11px] text-slate-500 mb-3">本月已使用 75% AI 额度。</p>
+<div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-3/4"></div>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-white text-sm font-bold py-2.5 rounded-lg hover:bg-primary-dark transition-all shadow-md shadow-blue-200">
+<span>升级套餐</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-hidden bg-background-light">
+<header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0 z-10">
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-slate-700 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<h1 class="text-sm font-bold text-slate-900">2024 年度行业深度分析报告（联合综述）</h1>
+<span class="bg-blue-50 text-primary text-[10px] px-1.5 py-0.5 rounded font-medium border border-blue-100">AI 生成中</span>
+<span class="text-[10px] text-slate-400">基于 3 个源文档</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex -space-x-2">
+<div class="size-8 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-blue-600" title="Alex Carter">AC</div>
+<div class="size-8 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-purple-600" title="AI Editor">AI</div>
+</div>
+<button class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">ios_share</span>
+                    导出
+                </button>
+<button class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-dark transition-colors shadow-sm shadow-blue-200 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">share</span>
+                    分享
+                </button>
+</div>
+</header>
+<div class="h-12 bg-white border-b border-slate-200 flex items-center px-4 gap-4 flex-shrink-0 shadow-sm z-10">
+<div class="flex items-center gap-1 border-r border-slate-200 pr-4">
+<select class="text-xs font-medium text-slate-700 bg-transparent border-none focus:ring-0 cursor-pointer">
+<option>正文</option>
+<option>标题 1</option>
+<option>标题 2</option>
+<option>标题 3</option>
+</select>
+</div>
+<div class="flex items-center gap-1 border-r border-slate-200 pr-4">
+<select class="text-xs font-medium text-slate-700 bg-transparent border-none focus:ring-0 cursor-pointer w-28">
+<option>思源黑体</option>
+<option>宋体</option>
+<option>Arial</option>
+</select>
+<select class="text-xs font-medium text-slate-700 bg-transparent border-none focus:ring-0 cursor-pointer w-16">
+<option>11</option>
+<option>12</option>
+<option>14</option>
+</select>
+</div>
+<div class="flex items-center gap-1 text-slate-500 border-r border-slate-200 pr-4">
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-800"><span class="material-symbols-outlined text-lg">format_bold</span></button>
+<button class="p-1.5 hover:bg-slate-100 rounded"><span class="material-symbols-outlined text-lg">format_italic</span></button>
+<button class="p-1.5 hover:bg-slate-100 rounded"><span class="material-symbols-outlined text-lg">format_underlined</span></button>
+<button class="p-1.5 hover:bg-slate-100 rounded"><span class="material-symbols-outlined text-lg">format_color_text</span></button>
+</div>
+<div class="flex items-center gap-1 text-slate-500 border-r border-slate-200 pr-4">
+<button class="p-1.5 hover:bg-slate-100 rounded"><span class="material-symbols-outlined text-lg">format_align_left</span></button>
+<button class="p-1.5 hover:bg-slate-100 rounded"><span class="material-symbols-outlined text-lg">format_align_center</span></button>
+<button class="p-1.5 hover:bg-slate-100 rounded"><span class="material-symbols-outlined text-lg">format_align_right</span></button>
+</div>
+<div class="flex items-center gap-1 text-slate-500">
+<button class="p-1.5 hover:bg-slate-100 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-lg">add_chart</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-lg">image</span>
+</button>
+</div>
+<div class="flex-1"></div>
+<button class="flex items-center gap-2 bg-slate-100 text-slate-600 hover:text-primary hover:bg-blue-50 border border-slate-200 px-4 py-1.5 rounded-full font-bold text-xs transition-all">
+<span class="material-symbols-outlined text-sm">history</span>
+<span>历史版本</span>
+</button>
+</div>
+<div class="flex-1 flex overflow-hidden relative">
+<div class="w-72 bg-slate-50 border-r border-slate-200 flex flex-col hidden lg:flex">
+<div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-500 text-sm">folder_open</span>
+<h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">数据源素材库</h3>
+</div>
+<button class="text-primary bg-blue-50 hover:bg-blue-100 p-1 rounded-md transition-colors" title="添加文档">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+<p class="text-[10px] text-slate-400 font-medium px-1 mb-2">已选中 3 个文档用于分析</p>
+<div class="flex items-start gap-3 p-3 bg-white border border-blue-200 shadow-sm rounded-lg group relative">
+<div class="pt-1">
+<input checked="" class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-red-500 text-lg">picture_as_pdf</span>
+<p class="text-xs font-bold text-slate-800 truncate">Industry Trends 2024.pdf</p>
+</div>
+<p class="text-[10px] text-slate-500">2.4 MB • 上传于 10分钟前</p>
+<div class="mt-2 flex flex-wrap gap-1">
+<span class="bg-slate-100 text-slate-500 text-[9px] px-1.5 py-0.5 rounded">宏观</span>
+<span class="bg-slate-100 text-slate-500 text-[9px] px-1.5 py-0.5 rounded">趋势</span>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-white border border-blue-200 shadow-sm rounded-lg group">
+<div class="pt-1">
+<input checked="" class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-green-600 text-lg">table_view</span>
+<p class="text-xs font-bold text-slate-800 truncate">Q3 Financials.xlsx</p>
+</div>
+<p class="text-[10px] text-slate-500">1.1 MB • 上传于 2小时前</p>
+<div class="mt-2 flex flex-wrap gap-1">
+<span class="bg-slate-100 text-slate-500 text-[9px] px-1.5 py-0.5 rounded">财务</span>
+<span class="bg-slate-100 text-slate-500 text-[9px] px-1.5 py-0.5 rounded">Q3</span>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-white border border-blue-200 shadow-sm rounded-lg group">
+<div class="pt-1">
+<input checked="" class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-blue-600 text-lg">description</span>
+<p class="text-xs font-bold text-slate-800 truncate">Competitor Analysis.docx</p>
+</div>
+<p class="text-[10px] text-slate-500">850 KB • 上传于 昨天</p>
+<div class="mt-2 flex flex-wrap gap-1">
+<span class="bg-slate-100 text-slate-500 text-[9px] px-1.5 py-0.5 rounded">竞对</span>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 border border-transparent hover:bg-slate-200/50 hover:border-slate-200 rounded-lg group transition-all opacity-70 hover:opacity-100">
+<div class="pt-1">
+<input class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-red-500 text-lg">picture_as_pdf</span>
+<p class="text-xs font-medium text-slate-700 truncate">Internal Memo_v2.pdf</p>
+</div>
+<p class="text-[10px] text-slate-400">0.5 MB • 上传于 3天前</p>
+</div>
+</div>
+</div>
+<div class="p-3 border-t border-slate-200 bg-white">
+<button class="w-full py-2 bg-slate-50 border border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">upload_file</span>
+                        上传新文档
+                    </button>
+</div>
+</div>
+<div class="flex-1 bg-slate-100/50 overflow-y-auto p-8 flex justify-center custom-scrollbar relative">
+<div class="fixed bottom-8 z-40 animate-fade-in-up">
+<div class="bg-slate-900 text-white rounded-full shadow-2xl shadow-blue-900/20 px-1.5 py-1.5 flex items-center gap-0 border border-slate-700/50 backdrop-blur-md bg-opacity-95 max-w-lg mx-auto">
+<div class="pl-4 pr-3 py-2 flex items-center gap-3 border-r border-slate-700">
+<div class="flex items-center -space-x-1.5">
+<span class="size-5 rounded bg-white text-red-500 flex items-center justify-center border border-slate-800"><span class="material-symbols-outlined text-[12px]">picture_as_pdf</span></span>
+<span class="size-5 rounded bg-white text-green-600 flex items-center justify-center border border-slate-800"><span class="material-symbols-outlined text-[12px]">table_view</span></span>
+<span class="size-5 rounded bg-white text-blue-600 flex items-center justify-center border border-slate-800"><span class="material-symbols-outlined text-[12px]">description</span></span>
+</div>
+<span class="text-xs font-medium text-slate-300">已选 3 个文档</span>
+</div>
+<div class="px-2">
+<button class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-lg shadow-blue-900/40">
+<span class="material-symbols-outlined text-base">auto_awesome</span>
+<span>开始多文档联合分析</span>
+</button>
+</div>
+</div>
+</div>
+<div class="a4-page p-12 md:p-16 relative mb-24">
+<h1 class="text-3xl font-bold text-slate-900 mb-6 leading-tight">2024 年度行业深度分析报告<br/><span class="text-xl text-slate-500 font-medium">多源数据综合研判版</span></h1>
+<div class="flex items-center gap-4 text-xs text-slate-500 mb-10 pb-4 border-b border-slate-100">
+<span>生成时间：2024年10月24日</span>
+<span class="w-1 h-1 rounded-full bg-slate-300"></span>
+<span>数据源：3 份文档</span>
+<span class="w-1 h-1 rounded-full bg-slate-300"></span>
+<span class="text-primary font-bold flex items-center gap-1"><span class="material-symbols-outlined text-sm">check_circle</span> 已交叉验证</span>
+</div>
+<div class="bg-blue-50 border border-blue-100 rounded-lg p-5 mb-8 relative group">
+<div class="absolute -left-1 top-4 w-1 h-8 bg-primary rounded-r"></div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-0.5">psychology</span>
+<div>
+<h4 class="text-sm font-bold text-primary mb-1">AI 综合摘要</h4>
+<p class="text-xs text-slate-600 leading-relaxed">
+                                    综合《行业趋势报告》与《Q3 财务报表》，本季度虽然面临供应链波动挑战<sup class="text-primary font-bold cursor-pointer text-[10px] ml-0.5" title="来源: Industry Trends 2024.pdf">[1]</sup>，但得益于新兴市场的强劲复苏，整体营收同比增长 15.2%<sup class="text-primary font-bold cursor-pointer text-[10px] ml-0.5" title="来源: Q3 Financials.xlsx">[2]</sup>。竞对分析显示，主要竞争对手正在缩减研发投入，这为我方在下季度抢占技术高地提供了战略窗口期<sup class="text-primary font-bold cursor-pointer text-[10px] ml-0.5" title="来源: Competitor Analysis.docx">[3]</sup>。
+                                </p>
+</div>
+</div>
+</div>
+<h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+<span class="text-primary">1.</span> 财务表现与市场趋势对比
+                    </h2>
+<p class="text-sm text-slate-700 leading-relaxed mb-6 text-justify">
+                        根据 Q3 财务数据，公司主营业务成本上升了 5%，主要受原材料价格上涨影响<sup class="text-primary font-bold cursor-pointer text-[10px] ml-0.5" title="来源: Q3 Financials.xlsx">[2]</sup>。然而，行业宏观分析指出，这种成本压力是全行业普遍现象，并非公司经营不善导致<sup class="text-primary font-bold cursor-pointer text-[10px] ml-0.5" title="来源: Industry Trends 2024.pdf">[1]</sup>。
+                    </p>
+<div class="border border-slate-200 rounded-lg p-6 mb-8 bg-white">
+<div class="flex items-center justify-between mb-6">
+<div class="flex flex-col">
+<h4 class="text-xs font-bold text-slate-700">图表 1.1：营收增长 vs 行业平均</h4>
+<p class="text-[10px] text-slate-400">数据来源：Q3 Financials.xlsx (Internal) &amp; Industry Trends (External)</p>
+</div>
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+</div>
+<div class="h-48 flex items-end justify-between gap-8 px-8">
+<div class="flex-1 flex justify-center gap-4 h-full items-end pb-2 border-b border-slate-200">
+<div class="w-12 bg-slate-300 rounded-t h-32 relative group cursor-pointer hover:bg-slate-400 transition-colors">
+<span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-slate-500 font-bold">8.5%</span>
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] text-white">行业</div>
+</div>
+<div class="w-12 bg-primary rounded-t h-48 relative shadow-lg shadow-blue-100 group cursor-pointer hover:bg-primary-dark transition-colors">
+<span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-primary">15.2%</span>
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] text-white">我方</div>
+</div>
+</div>
+</div>
+<div class="mt-3 flex justify-center items-center gap-6">
+<div class="flex items-center gap-1">
+<span class="size-2 rounded-full bg-slate-300"></span>
+<span class="text-[10px] text-slate-500">行业平均增长 (Source: PDF)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="size-2 rounded-full bg-primary"></span>
+<span class="text-[10px] text-slate-500">公司 Q3 增长 (Source: XLSX)</span>
+</div>
+</div>
+</div>
+<h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+<span class="text-primary">2.</span> 竞争格局演变
+                    </h2>
+<p class="text-sm text-slate-700 leading-relaxed mb-6 text-justify">
+                        竞对分析文档显示，Competitor A 正在从硬件转向服务订阅模式<sup class="text-primary font-bold cursor-pointer text-[10px] ml-0.5" title="来源: Competitor Analysis.docx">[3]</sup>。结合财务报表中服务板块 30% 的高毛利表现<sup class="text-primary font-bold cursor-pointer text-[10px] ml-0.5" title="来源: Q3 Financials.xlsx">[2]</sup>，我们建议在 Q4 加大服务产品的营销力度，直接对标竞对的转型弱点。
+                    </p>
+<div class="bg-slate-50 border-l-2 border-slate-300 p-4 mb-4">
+<p class="text-xs text-slate-600 italic">
+                            "未来三年，数字化服务将成为区分市场领导者与追随者的分水岭。" —— 摘自 Industry Trends 2024.pdf, 第 14 页 <sup class="text-slate-400 font-bold cursor-pointer text-[10px] ml-0.5">[1]</sup>
+</p>
+</div>
+<p class="text-sm text-slate-700 leading-relaxed text-justify">
+                        因此，基于多方信息的交叉验证，我们认为当前的战略重点应从单纯的产能扩张转向提升客户生命周期价值（LTV）。
+                    </p>
+</div>
+</div>
+<div class="w-80 bg-white border-l border-slate-200 flex flex-col hidden xl:flex shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)] z-20">
+<div class="flex items-center border-b border-slate-200">
+<button class="flex-1 py-3 text-xs font-bold text-primary border-b-2 border-primary bg-blue-50/50 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+                        AI 联合综述
+                    </button>
+<button class="flex-1 py-3 text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors">
+                        引用图谱
+                    </button>
+</div>
+<div class="p-4 flex-1 overflow-y-auto custom-scrollbar">
+<div class="mb-6">
+<div class="flex items-center justify-between mb-2">
+<h4 class="text-xs font-bold text-slate-800">联合分析进度</h4>
+<span class="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">完成</span>
+</div>
+<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2">
+<div class="bg-green-500 h-full w-full"></div>
+</div>
+<p class="text-[10px] text-slate-500">已提取 24 个关键数据点，发现 3 处跨文档关联。</p>
+</div>
+<div class="mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">lightbulb</span>
+<h4 class="text-xs font-bold text-slate-800">跨文档核心发现</h4>
+</div>
+<div class="space-y-3">
+<div class="p-3 bg-blue-50 border border-blue-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold text-blue-700 uppercase tracking-wider">增长归因</span>
+<div class="flex -space-x-1">
+<span class="size-4 bg-white rounded border border-slate-200 flex items-center justify-center text-[8px] text-red-500" title="PDF">P</span>
+<span class="size-4 bg-white rounded border border-slate-200 flex items-center justify-center text-[8px] text-green-600" title="Excel">E</span>
+</div>
+</div>
+<p class="text-xs text-slate-700 leading-snug font-medium mb-2">
+                                财务报表显示的 Q3 增长主要由海外市场贡献，这与行业报告中“全球新兴市场复苏”的趋势高度一致。
+                            </p>
+<div class="flex items-center gap-1 text-[10px] text-blue-400 group-hover:text-blue-600">
+<span>点击查看源文段</span>
+<span class="material-symbols-outlined text-[10px]">arrow_forward</span>
+</div>
+</div>
+<div class="p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">风险预警</span>
+<div class="flex -space-x-1">
+<span class="size-4 bg-white rounded border border-slate-200 flex items-center justify-center text-[8px] text-green-600" title="Excel">E</span>
+<span class="size-4 bg-white rounded border border-slate-200 flex items-center justify-center text-[8px] text-blue-600" title="Doc">D</span>
+</div>
+</div>
+<p class="text-xs text-slate-600 leading-snug mb-2">
+                                尽管毛利率提升，但竞对分析指出 Competitor A 已通过低价策略渗透市场，可能影响 Q4 销量。
+                            </p>
+</div>
+<div class="p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">战略建议</span>
+<div class="flex -space-x-1">
+<span class="size-4 bg-white rounded border border-slate-200 flex items-center justify-center text-[8px] text-red-500" title="PDF">P</span>
+</div>
+</div>
+<p class="text-xs text-slate-600 leading-snug mb-2">
+                                行业趋势建议加大 ESG 投入，目前我方财报中相关支出占比低于行业平均水平 2 个百分点。
+                            </p>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-slate-100">
+<h4 class="text-xs font-bold text-slate-800 mb-3">引用来源统计</h4>
+<div class="space-y-2">
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-slate-600 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400"></span> Industry Trends.pdf</span>
+<span class="font-bold text-slate-800">12 处</span>
+</div>
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-slate-600 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> Q3 Financials.xlsx</span>
+<span class="font-bold text-slate-800">8 处</span>
+</div>
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-slate-600 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Competitor.docx</span>
+<span class="font-bold text-slate-800">5 处</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

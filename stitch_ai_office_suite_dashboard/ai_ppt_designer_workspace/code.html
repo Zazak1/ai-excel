@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI PPT 设计工作区 - 简约蓝白版</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1337ec",
+                        "primary-hover": "#0f2cb8",
+                        "surface": "#ffffff",
+                        "surface-highlight": "#f3f4f6",
+                        "border-color": "#e5e7eb",
+                        "text-main": "#111827",
+                        "text-muted": "#6b7280",
+                    },
+                    fontFamily: {
+                        "display": ["Noto Sans SC", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f9fafb;
+        }
+        .canvas-shadow {
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+        }::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-[#f9fafb] text-text-main font-display overflow-hidden h-screen flex flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-color px-6 py-3 bg-white shrink-0 shadow-sm z-20">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3 text-text-main">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-white">auto_awesome</span>
+</div>
+<div class="flex flex-col">
+<h2 class="text-text-main text-md font-bold leading-tight tracking-tight">AI PPT 设计工作区</h2>
+<p class="text-text-muted text-xs">Project Alpha • 2分钟前保存</p>
+</div>
+</div>
+<div class="h-6 w-[1px] bg-border-color mx-2"></div>
+<div class="flex items-center gap-6">
+<a class="text-text-muted hover:text-primary text-sm font-medium transition-colors" href="#">文件</a>
+<a class="text-text-muted hover:text-primary text-sm font-medium transition-colors" href="#">插入</a>
+<a class="text-text-muted hover:text-primary text-sm font-medium transition-colors" href="#">设计</a>
+<a class="text-text-muted hover:text-primary text-sm font-medium transition-colors" href="#">切换</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<label class="flex flex-col min-w-40 !h-9 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full border border-border-color bg-surface-highlight hover:border-primary/50 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
+<div class="text-text-muted flex items-center justify-center pl-3 rounded-l-lg">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-transparent text-text-main focus:ring-0 h-full placeholder:text-text-muted/70 px-2 text-sm rounded-r-lg" placeholder="搜索命令..." value=""/>
+</div>
+</label>
+<div class="flex gap-2">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 rounded-lg h-9 px-4 bg-primary text-white text-xs font-bold transition-all hover:bg-primary-hover shadow-sm">
+<span class="material-symbols-outlined text-sm">play_arrow</span>
+<span class="truncate">放映</span>
+</button>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 rounded-lg h-9 px-4 bg-white border border-border-color text-text-main text-xs font-bold hover:bg-gray-50 transition-colors">
+<span class="material-symbols-outlined text-sm text-text-muted">ios_share</span>
+<span class="truncate">导出</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 border border-border-color shadow-sm cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC917rMiWCRrPmflfVgrZLkcXxaKciVM43RJYkt646NfsnHVPPCO6lL1e9CRYFbHAzc7YnJ7ZMojxJzGtiiSxf-xX7o12I6GunArFtYLQaly43eNK6qeTaKo1vC-hHc91_15VHVqASU3kxvc3om1ijpIxubvuq0VRD1bKahvp7Al1Eqz702rANyQCC9XHBGktws4-TRqliRoOOn7qXv_KjsSOqR4uiC9bp_AmoOtvtj-j4zM1HSUXSy4rJnWnmDOuvvjJTy3KdaOqA");'></div>
+</div>
+</header>
+<main class="flex flex-1 overflow-hidden">
+<aside class="w-64 border-r border-border-color flex flex-col bg-white shrink-0 z-10">
+<div class="p-4 flex flex-col gap-4 overflow-y-auto flex-1">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-text-muted uppercase tracking-wider">幻灯片</span>
+<span class="material-symbols-outlined text-text-muted cursor-pointer hover:text-primary">view_module</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-2 group cursor-pointer">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-2 ring-primary shadow-md relative overflow-hidden" data-alt="Slide 1 thumbnail intro" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDhcmtBUaoYkuWomYUNoqc-0CJ-W6XZ5LXMC7ycQ_hR7K9qsG2t9_RJkRrZpKEGu6q7E873mv5i_UyDsF9y-GFk5rCI5rYLJA3ag5lipoyCge7ifhMBRIRYKAhcPxEAJTkkZaXEuqmbrzYdJwoq3udmi8v35FgZ_uYY9-waE4tHoiueC4-85AAq1AifjpErBw4XzPI00QDN_th_-r-cLHUMVdySs11I7hbraSaBBcToddOepVln_gvgo0JUNPX9T_kVmSL6LrxwDho");'>
+<div class="absolute top-1 left-1 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">1</div>
+</div>
+<p class="text-text-main text-xs font-medium">1. 简介：市场趋势</p>
+</div>
+<div class="flex flex-col gap-2 group cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-1 ring-border-color hover:ring-primary/50 relative overflow-hidden" data-alt="Slide 2 thumbnail data" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC6-MYXYNPKaSqnv7I2M5KsUiF5CXF_Ouxgpni7vn2zBzpY1g8BxewHdgz14aoJmGHMMqjXao_o4Zk6u-gw_QiRc1CM6YrGE-lT8QddoZpLynOO03wpaCv9EoSPHh1I2rpoSVWqzoyvnSCJyK4CiaFUzByesXn1YizfhCJ8rWm2keF77QyKhm0N_hx2JCWFxHcFah6GH3dT2SSvxJ5RZNNvv7RBS7EteUw5l2NIU3HgBlgB1UjFLZ1Komk2WYq-F4IyhFEi9_9QnyI");'>
+<div class="absolute top-1 left-1 bg-white/90 backdrop-blur-sm text-text-main text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm border border-black/5">2</div>
+</div>
+<p class="text-text-main text-xs font-medium">2. 数据分析</p>
+</div>
+<div class="flex flex-col gap-2 group cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-1 ring-border-color hover:ring-primary/50 relative overflow-hidden" data-alt="Slide 3 thumbnail charts" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuArf04ZkEN1ELuL1T-uyOxC0HyFcN8ERRrAdOxdkfJVOaWkE3msSsYujwRXjWk03_gEUKjErCHaYhUWpd5qmj6jla0FAINIX0RZGQ-Bka4b37MPe8xHr7VA0puZe7QEjiNMFwpUN0wA_lj02gSCoQghnJ5O4ivghZQtss4qGN9hmcreGVq_3-dkQ901PAugJfOPuJ6uox113GvmW5I8JIag0T2FvpoQVLEqFx84CtpNZmmzqBNsEF_ZpvtW_axZ6KnZqTnwi36FEFk");'>
+<div class="absolute top-1 left-1 bg-white/90 backdrop-blur-sm text-text-main text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm border border-black/5">3</div>
+</div>
+<p class="text-text-main text-xs font-medium">3. 全球扩张</p>
+</div>
+<div class="flex flex-col gap-2 group cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-1 ring-border-color hover:ring-primary/50 relative overflow-hidden" data-alt="Slide 4 thumbnail conclusion" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAvTj-AcoMy47L2fdUHPa4_YoRlJFcSMd8YucYub_HB-LVb1VHjNLlJuri_o8bn_n-4wZPygCHDHwq_TidesyUeMA4MoAg5SX-mraJPv0BpqYYhfONUk9mgylE78Le54pQvtSmVEjOS3P3SdR-mhPdKDV_HqEWmG_EF_HJnsihkskFNrQDqVA4AueK-CT-ii8PyXtVOftc88jJB2N6lHLEJiZihtlYNv_vM3ZyDqzQafy38Ozr3GqlgwfiNkkByeoiGkkfcvzTIJ9M");'>
+<div class="absolute top-1 left-1 bg-white/90 backdrop-blur-sm text-text-main text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm border border-black/5">4</div>
+</div>
+<p class="text-text-main text-xs font-medium">4. 下一步计划</p>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-border-color">
+<button class="w-full flex items-center justify-center gap-2 rounded-lg h-10 bg-primary/5 text-primary border border-primary/20 text-sm font-bold hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">add</span>
+<span>新建幻灯片</span>
+</button>
+</div>
+</aside>
+<section class="flex-1 flex flex-col bg-[#f3f4f6] relative items-center justify-center p-8 overflow-auto">
+<div class="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-border-color shadow-lg z-10">
+<button class="p-2 text-text-muted hover:text-primary hover:bg-surface-highlight rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]">keyboard</span>
+</button>
+<button class="p-2 text-text-muted hover:text-primary hover:bg-surface-highlight rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]">image</span>
+</button>
+<button class="p-2 text-text-muted hover:text-primary hover:bg-surface-highlight rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]">category</span>
+</button>
+<button class="p-2 text-text-muted hover:text-primary hover:bg-surface-highlight rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]">format_paint</span>
+</button>
+<button class="p-2 text-text-muted hover:text-primary hover:bg-surface-highlight rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]">link</span>
+</button>
+<div class="h-6 w-[1px] bg-border-color mx-1"></div>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-blue-500 text-white text-xs font-bold ml-1 hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-[16px]">magic_button</span>
+<span>AI 重排</span>
+</button>
+</div>
+<div class="w-full max-w-[960px] aspect-video bg-white rounded-lg canvas-shadow relative group ring-1 ring-black/5">
+<div class="h-full w-full p-12 flex flex-col justify-center bg-white rounded-lg overflow-hidden">
+<div class="space-y-4">
+<div class="h-2 w-24 bg-primary rounded-full mb-6"></div>
+<h1 class="text-4xl font-black text-text-main leading-tight">2024 全球市场趋势:<br/><span class="text-primary">AI 变革</span></h1>
+<p class="text-lg text-gray-500 max-w-xl">关于生成式智能如何重塑顶级行业企业工作流程和生产力指标的综合分析。</p>
+</div>
+<div class="mt-12 grid grid-cols-3 gap-6">
+<div class="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+<p class="text-primary font-bold text-2xl">45%</p>
+<p class="text-text-muted text-xs font-medium uppercase mt-1">效率提升</p>
+</div>
+<div class="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+<p class="text-primary font-bold text-2xl">12k+</p>
+<p class="text-text-muted text-xs font-medium uppercase mt-1">数据点</p>
+</div>
+<div class="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+<p class="text-primary font-bold text-2xl">0.8s</p>
+<p class="text-text-muted text-xs font-medium uppercase mt-1">平均响应</p>
+</div>
+</div>
+</div>
+<div class="hidden group-hover:block absolute -top-1 -left-1 size-2.5 bg-white border-2 border-primary rounded-full shadow-sm z-20"></div>
+<div class="hidden group-hover:block absolute -top-1 -right-1 size-2.5 bg-white border-2 border-primary rounded-full shadow-sm z-20"></div>
+<div class="hidden group-hover:block absolute -bottom-1 -left-1 size-2.5 bg-white border-2 border-primary rounded-full shadow-sm z-20"></div>
+<div class="hidden group-hover:block absolute -bottom-1 -right-1 size-2.5 bg-white border-2 border-primary rounded-full shadow-sm z-20"></div>
+</div>
+<div class="absolute bottom-4 right-8 flex items-center gap-4 bg-white px-3 py-1.5 rounded-full border border-border-color shadow-md text-text-muted">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] hover:text-text-main cursor-pointer">remove</span>
+<span class="text-[11px] font-bold text-text-main min-w-8 text-center">72%</span>
+<span class="material-symbols-outlined text-[16px] hover:text-text-main cursor-pointer">add</span>
+</div>
+<div class="h-4 w-[1px] bg-border-color"></div>
+<span class="material-symbols-outlined text-[18px] hover:text-text-main cursor-pointer">fit_screen</span>
+</div>
+</section>
+<aside class="w-80 border-l border-border-color bg-white flex flex-col shrink-0 z-10">
+<div class="p-4 flex items-center justify-between border-b border-border-color bg-white">
+<div class="flex items-center gap-2">
+<div class="bg-primary/10 p-1 rounded-md">
+<span class="material-symbols-outlined text-primary text-sm">auto_fix_high</span>
+</div>
+<h3 class="text-sm font-bold text-text-main">AI 助手</h3>
+</div>
+<span class="material-symbols-outlined text-text-muted text-sm cursor-pointer hover:text-text-main">close</span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6 bg-white">
+<div class="flex flex-col gap-3">
+<p class="text-xs font-bold text-text-muted uppercase tracking-wider">布局建议</p>
+<div class="grid grid-cols-2 gap-2">
+<div class="aspect-video bg-surface-highlight rounded-lg border border-border-color hover:border-primary hover:shadow-md cursor-pointer transition-all p-2 flex flex-col gap-1 group">
+<div class="h-1 w-2/3 bg-primary/20 group-hover:bg-primary/40 rounded-full transition-colors"></div>
+<div class="h-1 w-full bg-gray-200 rounded-full"></div>
+<div class="flex-1 bg-white border border-gray-100 rounded-md mt-1 shadow-sm"></div>
+</div>
+<div class="aspect-video bg-surface-highlight rounded-lg border border-border-color hover:border-primary hover:shadow-md cursor-pointer transition-all p-2 flex flex-col gap-1 group">
+<div class="flex gap-1 h-full">
+<div class="w-1/3 bg-gray-200 rounded-md"></div>
+<div class="w-2/3 flex flex-col gap-1">
+<div class="h-1 w-full bg-primary/20 group-hover:bg-primary/40 rounded-full transition-colors"></div>
+<div class="h-1 w-full bg-gray-200 rounded-full"></div>
+<div class="h-1 w-1/2 bg-gray-200 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<p class="text-xs font-bold text-text-muted uppercase tracking-wider">生成图片</p>
+<button class="text-[10px] text-primary font-bold hover:underline">重新生成</button>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="w-full aspect-square bg-center bg-no-repeat bg-cover rounded-lg border border-border-color cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all" data-alt="Abstract futuristic AI network visualization" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDgn1TBr1lSGTXF6GInX5A929AvCzRKhWbrtHlOdwK6e4aMpA54TeGZJX8IyIw8dtKWdmgvzH0ZhlOinHqcE_BDkW9SqqeQRrmIjRkck4NrQJ-UHriqdTl-xapNiGOIZC2B_kftlzSKrS2qW567ZaJwfnBMVqH0XOQYojrDigHRc5jGgYFDnajjORQCYZGJb8C2o8ZOdEx1uXzdOdEdYXtzjRbUNn4R4up_mRxNGXiEOiFYE7KYrB7em6hOWEoM67jjpX8b4THDunw");'></div>
+<div class="w-full aspect-square bg-center bg-no-repeat bg-cover rounded-lg border border-border-color cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all" data-alt="Data visualization 3D rendering" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAdgO7J1DZMOAQQCwlu-T4PzIA_5e_d5zRw5JZ-GRcPNWyu6waiKLy2SixNjXo1D_-hFaVyVonqLv13zhxv6ikIGC0Pisjem9_Qtv6YVwQZGXt7_m7p_w7JRd6tUI-y_PeCOp72KN8sbzGtS4mqY0sqJZMlVc_4Img6mkN74ysi5q8qwbdRvLgeZ0rrV77ZnpdiXFjzdgGHhio2oG0izbIW6RucDeygqL2nCHTblEb7IM21Io6-hg2nKzow1rmjN5rOQtdIbIIM09Q");'></div>
+</div>
+</div>
+<div class="bg-blue-50 border border-blue-100 rounded-xl p-4 shadow-sm">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm">lightbulb</span>
+<p class="text-xs font-bold text-primary uppercase">内容洞察</p>
+</div>
+<p class="text-xs text-text-muted leading-relaxed">此幻灯片包含多个数据点。我们建议使用<span class="text-text-main font-bold">比较网格</span>布局以提高32%的可读性。</p>
+<button class="mt-3 w-full py-2 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary-hover shadow-sm transition-colors">应用洞察</button>
+</div>
+</div>
+<div class="p-4 border-t border-border-color bg-gray-50">
+<div class="relative group">
+<textarea class="w-full bg-white border border-border-color rounded-xl p-3 text-xs text-text-main placeholder:text-text-muted/70 focus:ring-1 focus:ring-primary focus:border-primary resize-none pr-10 shadow-sm transition-all" placeholder="让 AI 更改布局、添加图片或重写内容..." rows="3"></textarea>
+<button class="absolute bottom-3 right-3 text-primary p-1 rounded-md hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">send</span>
+</button>
+</div>
+<div class="flex gap-2 mt-3 overflow-x-auto pb-1 no-scrollbar">
+<span class="px-2.5 py-1.5 rounded-full bg-white border border-border-color text-[10px] text-text-muted font-medium whitespace-nowrap cursor-pointer hover:border-primary hover:text-primary transition-all shadow-sm">总结文本</span>
+<span class="px-2.5 py-1.5 rounded-full bg-white border border-border-color text-[10px] text-text-muted font-medium whitespace-nowrap cursor-pointer hover:border-primary hover:text-primary transition-all shadow-sm">更专业</span>
+</div>
+</div>
+</aside>
+</main>
+
+</body></html>

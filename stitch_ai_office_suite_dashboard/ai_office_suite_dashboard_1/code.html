@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI 办公套件控制台 - 简约蓝白版</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1337ec",
+                        "primary-dark": "#0f2cb8",
+                        "background-light": "#f6f6f8",
+                        "surface": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["'Noto Sans SC'", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-background-light text-slate-800 font-display min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-64 flex-shrink-0 flex flex-col bg-surface border-r border-slate-200">
+<div class="p-6 flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-md shadow-blue-200">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<h2 class="text-lg font-bold tracking-tight text-slate-900">AI 办公套件</h2>
+</div>
+<nav class="flex-1 px-4 py-4 space-y-1 custom-scrollbar overflow-y-auto">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-50 text-primary border border-blue-100">
+<span class="material-symbols-outlined">grid_view</span>
+<p class="text-sm font-bold">控制台</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">table_chart</span>
+<p class="text-sm font-medium">AI 智能表格</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">slideshow</span>
+<p class="text-sm font-medium">AI PPT 设计</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">analytics</span>
+<p class="text-sm font-medium">数据分析</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">description</span>
+<p class="text-sm font-medium">深度报告</p>
+</div>
+<div class="pt-8 pb-2">
+<p class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">账户</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium">设置</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium">帮助中心</p>
+</div>
+</nav>
+<div class="p-4 mt-auto border-t border-slate-100">
+<div class="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-4">
+<div class="flex items-center justify-between mb-1">
+<p class="text-xs font-bold text-slate-800">专业版</p>
+<span class="text-[10px] font-bold text-primary bg-blue-50 px-1.5 py-0.5 rounded">PRO</span>
+</div>
+<p class="text-[11px] text-slate-500 mb-3">本月已使用 75% AI 额度。</p>
+<div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-3/4"></div>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-white text-sm font-bold py-2.5 rounded-lg hover:bg-primary-dark transition-all shadow-md shadow-blue-200">
+<span>升级套餐</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-hidden bg-background-light">
+<header class="flex items-center justify-between px-8 py-4 bg-white border-b border-slate-200">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary placeholder:text-slate-400 focus:bg-white transition-colors" placeholder="搜索文件、报告或 AI 洞察..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-100 rounded-lg relative transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+<div class="flex items-center gap-3 pl-2 cursor-pointer group">
+<div class="text-right">
+<p class="text-sm font-bold text-slate-800">Alex Carter</p>
+<p class="text-[11px] text-slate-500">企业版会员</p>
+</div>
+<div class="size-10 rounded-full bg-cover bg-center border-2 border-slate-100 group-hover:border-primary transition-all" data-alt="User profile avatar showing Alex Carter" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCs4aTCxyp9u1z5E5c7hY_1MaLsLFfADxG_OFfTvU-cD6o6EobKEo6gcNbudgyuYZApFQArExUHqsAxHoeb3d4_psrJ73BElf38iiCd43tY0qa2JM_MXdG2qqDelTOgKKbYs9tqEyHqcVGRZltWeDhsGuXgzFhKo555Ixc8iyKo7z-rgYpAacilHT0TwLuiIaRDbPFoEjTMzJbNvdPx-jWqhisDU-IChDQKeZvb_Ybg_F5UH6dWZA4Bvw5Xj8jKb4bd8CZOLZdmoPE");'></div>
+</div>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-slate-900">早上好，Alex</h1>
+<p class="text-slate-500 mt-1">您在所有工具中有 12 个活跃项目。上次登录是在 2 小时前。</p>
+</div>
+<button class="flex items-center justify-center gap-2 bg-primary text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-lg shadow-blue-200 hover:bg-primary-dark hover:shadow-xl active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-xl">add_circle</span>
+<span>新建 AI 项目</span>
+</button>
+</div>
+<h2 class="text-lg font-bold mb-5 text-slate-800 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">rocket_launch</span>
+                核心 AI 工具
+            </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+<div class="group bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-50 transition-all cursor-pointer">
+<div class="size-12 bg-blue-50 text-primary rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">table_chart</span>
+</div>
+<h3 class="text-base font-bold mb-1 text-slate-900">AI 智能表格</h3>
+<p class="text-sm text-slate-500 mb-4 leading-relaxed">通过自然语言自动处理复杂公式和数据清洗。</p>
+<div class="flex items-center text-xs font-bold text-primary group-hover:gap-2 transition-all">
+<span>打开表格</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+<div class="group bg-white p-5 rounded-xl border border-slate-200 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-50 transition-all cursor-pointer">
+<div class="size-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">auto_fix_high</span>
+</div>
+<h3 class="text-base font-bold mb-1 text-slate-900">AI PPT 设计</h3>
+<p class="text-sm text-slate-500 mb-4 leading-relaxed">通过简单的提示词或文档生成演示文稿。</p>
+<div class="flex items-center text-xs font-bold text-purple-600 group-hover:gap-2 transition-all">
+<span>创建幻灯片</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+<div class="group bg-white p-5 rounded-xl border border-slate-200 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-50 transition-all cursor-pointer">
+<div class="size-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">monitoring</span>
+</div>
+<h3 class="text-base font-bold mb-1 text-slate-900">数据分析</h3>
+<p class="text-sm text-slate-500 mb-4 leading-relaxed">连接数据，即刻获取可视化洞察和预测。</p>
+<div class="flex items-center text-xs font-bold text-emerald-600 group-hover:gap-2 transition-all">
+<span>分析数据</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+<div class="group bg-white p-5 rounded-xl border border-slate-200 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-50 transition-all cursor-pointer">
+<div class="size-12 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">summarize</span>
+</div>
+<h3 class="text-base font-bold mb-1 text-slate-900">深度报告</h3>
+<p class="text-sm text-slate-500 mb-4 leading-relaxed">AI 驱动的执行摘要和深度技术报告。</p>
+<div class="flex items-center text-xs font-bold text-orange-600 group-hover:gap-2 transition-all">
+<span>撰写报告</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between mb-5">
+<h2 class="text-lg font-bold text-slate-800">最近项目</h2>
+<button class="text-sm font-medium text-slate-500 hover:text-primary flex items-center gap-1 transition-colors">
+                    查看全部
+                    <span class="material-symbols-outlined text-base">chevron_right</span>
+</button>
+</div>
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 text-slate-500 text-[11px] font-bold uppercase tracking-wider border-b border-slate-100">
+<th class="px-6 py-4">文件名</th>
+<th class="px-6 py-4">最后修改</th>
+<th class="px-6 py-4">类型</th>
+<th class="px-6 py-4">状态</th>
+<th class="px-6 py-4 text-right">操作</th>
+</tr>
+</thead>
+<tbody class="text-sm divide-y divide-slate-100">
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded bg-emerald-50 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined text-xl">description</span>
+</div>
+<span class="font-medium text-slate-900">Q3 财务绩效报告</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500">14 分钟前</td>
+<td class="px-6 py-4 text-slate-500">深度报告</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase">就绪</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded bg-blue-50 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl">table_rows</span>
+</div>
+<span class="font-medium text-slate-900">2024 消费趋势数据集</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500">2 小时前</td>
+<td class="px-6 py-4 text-slate-500">AI 表格</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 uppercase">分析中</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded bg-purple-50 flex items-center justify-center text-purple-600">
+<span class="material-symbols-outlined text-xl">present_to_all</span>
+</div>
+<span class="font-medium text-slate-900">执行战略演示文稿</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500">昨天 16:12</td>
+<td class="px-6 py-4 text-slate-500">PPT 设计</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 uppercase">草稿</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded bg-orange-50 flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined text-xl">analytics</span>
+</div>
+<span class="font-medium text-slate-900">营销 ROI 仪表盘</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500">3 天前</td>
+<td class="px-6 py-4 text-slate-500">数据分析</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase">就绪</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+<div class="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-bold text-slate-800">AI 效率指标</h3>
+<select class="bg-transparent border-none text-xs font-bold text-slate-400 focus:ring-0 cursor-pointer hover:text-primary transition-colors">
+<option>过去 7 天</option>
+<option>过去 30 天</option>
+</select>
+</div>
+<div class="flex items-end justify-between h-48 gap-2">
+<div class="w-full bg-blue-50 hover:bg-blue-100 transition-colors rounded-t-lg relative group" style="height: 40%">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 text-[10px] font-bold text-slate-400 group-hover:text-primary">周一</div>
+</div>
+<div class="w-full bg-blue-50 hover:bg-blue-100 transition-colors rounded-t-lg relative group" style="height: 65%">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 text-[10px] font-bold text-slate-400 group-hover:text-primary">周二</div>
+</div>
+<div class="w-full bg-blue-50 hover:bg-blue-100 transition-colors rounded-t-lg relative group" style="height: 50%">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 text-[10px] font-bold text-slate-400 group-hover:text-primary">周三</div>
+</div>
+<div class="w-full bg-blue-50 hover:bg-blue-100 transition-colors rounded-t-lg relative group" style="height: 85%">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 text-[10px] font-bold text-slate-400 group-hover:text-primary">周四</div>
+</div>
+<div class="w-full bg-primary rounded-t-lg relative shadow-lg shadow-blue-200" style="height: 100%">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 text-[10px] font-bold text-primary">周五</div>
+</div>
+<div class="w-full bg-blue-50 hover:bg-blue-100 transition-colors rounded-t-lg relative group" style="height: 45%">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 text-[10px] font-bold text-slate-400 group-hover:text-primary">周六</div>
+</div>
+<div class="w-full bg-blue-50 hover:bg-blue-100 transition-colors rounded-t-lg relative group" style="height: 30%">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 text-[10px] font-bold text-slate-400 group-hover:text-primary">周日</div>
+</div>
+</div>
+</div>
+<div class="bg-primary text-white p-6 rounded-xl shadow-xl shadow-blue-200 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-white/70">lightbulb</span>
+<span class="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded uppercase">每日贴士</span>
+</div>
+<h3 class="text-lg font-bold leading-tight mb-2">使用 AI 批量公式生成可节省 4 小时</h3>
+<p class="text-sm text-white/80 leading-relaxed">粘贴列表头，让 AI 在几秒钟内为整个表格生成一致的公式。</p>
+</div>
+<button class="w-full mt-6 py-2 bg-white text-primary text-sm font-bold rounded-lg hover:bg-blue-50 transition-colors">
+                        立即尝试
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
